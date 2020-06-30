@@ -18,20 +18,43 @@ import {
 
 interface NodeProps {
   nodeKey: string;
+  currentNodeKey: string;
   pathwayState: State;
   xCoordinate: number;
   yCoordinate: number;
+  isTransitionOfCurrentBranch: boolean;
   expanded?: boolean;
   onClick?: (nodeName: string) => void;
-  currentNode: State;
 }
 
 const Node: FC<NodeProps & { ref: Ref<HTMLDivElement> }> = memo(
   forwardRef<HTMLDivElement, NodeProps>(
     (
-      { nodeKey, pathwayState, xCoordinate, yCoordinate, expanded = false, onClick, currentNode },
+      {
+        nodeKey,
+        currentNodeKey,
+        pathwayState,
+        xCoordinate,
+        yCoordinate,
+        isTransitionOfCurrentBranch,
+        expanded = false,
+        onClick
+      },
       ref
     ) => {
+      let currentProps: any = {
+        nodeKey: nodeKey,
+        currentNodeKey: currentNodeKey,
+        pathwayState: pathwayState,
+        xCoordinate: xCoordinate,
+        yCoordinate: yCoordinate,
+        isTransitionOfCurrentBranch: isTransitionOfCurrentBranch,
+        expanded: expanded
+      };
+      if (onClick) currentProps.onClick = onClick.toString();
+      console.log('Rendering Node: ' + nodeKey);
+      console.log(currentProps);
+
       const [hasMetadata, setHasMetadata] = useState<boolean>(
         isGuidanceState(pathwayState) ? pathwayState.action.length > 0 : false
       );
@@ -49,15 +72,19 @@ const Node: FC<NodeProps & { ref: Ref<HTMLDivElement> }> = memo(
         }
       }, [hasMetadata, pathwayState, setHasMetadata, onClickHandler, expanded]);
 
+      useEffect(() => {
+        console.log('mounting Node: ' + nodeKey);
+
+        return () => console.log('unmounting node: ' + nodeKey);
+      }, []);
+
       const { label } = pathwayState;
       const style = {
         top: yCoordinate,
         left: xCoordinate
       };
 
-      const isCurrentNode = pathwayState.key === currentNode.key;
-      const isTransitionOfCurrentBranch =
-        isBranchState(currentNode) && currentNode.transitions.some(e => e?.transition === nodeKey);
+      const isCurrentNode = pathwayState.key === currentNodeKey;
 
       const isActionable = isCurrentNode;
       const topLevelClasses = [styles.node];
@@ -132,5 +159,7 @@ const StatusIcon: FC<StatusIconProps> = ({ status }) => {
     </div>
   );
 };
+
+Node.whyDidYouRender = true;
 
 export default Node;

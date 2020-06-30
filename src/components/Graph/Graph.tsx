@@ -17,6 +17,7 @@ import { Pathway, State } from 'pathways-model';
 import { Layout, NodeDimensions, NodeCoordinates, Edges } from 'graph-model';
 import styles from './Graph.module.scss';
 import ResizeSensor from 'css-element-queries/src/ResizeSensor';
+import { isBranchState } from 'utils/nodeUtils';
 
 interface GraphProps {
   pathway: Pathway;
@@ -36,6 +37,12 @@ const Graph: FC<GraphProps> = memo(
     const [parentWidth, setParentWidth] = useState<number>(
       graphElement?.current?.parentElement?.clientWidth ?? 0
     );
+
+    useEffect(() => {
+      console.log('Mounting graph');
+
+      return () => console.log('unmounting graph');
+    }, []);
 
     // Get the layout of the graph
     const getGraphLayout = useCallback((): Layout => {
@@ -234,6 +241,7 @@ const GraphMemo: FC<GraphMemoProps> = memo(
                 <Node
                   key={nodeName}
                   nodeKey={nodeName}
+                  currentNodeKey={currentNode.key ?? ''}
                   ref={(node: HTMLDivElement): void => {
                     if (node) nodeRefs.current[nodeName] = node;
                     else delete nodeRefs.current[nodeName];
@@ -241,9 +249,12 @@ const GraphMemo: FC<GraphMemoProps> = memo(
                   pathwayState={pathway.states[nodeName]}
                   xCoordinate={nodeCoordinates[nodeName].x + parentWidth / 2}
                   yCoordinate={nodeCoordinates[nodeName].y}
+                  isTransitionOfCurrentBranch={
+                    isBranchState(currentNode) &&
+                    currentNode.transitions.some(e => e?.transition === nodeName)
+                  }
                   expanded={Boolean(expanded[nodeName])}
                   onClick={onClickHandler}
-                  currentNode={currentNode}
                 />
               );
             })

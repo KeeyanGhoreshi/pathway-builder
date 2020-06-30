@@ -28,6 +28,12 @@ const Builder: FC<BuilderProps> = ({ pathway, updatePathway, currentNode }) => {
         window.innerHeight - headerElement.current.clientHeight + 'px';
   }, [pathway, headerElement, graphContainerElement]);
 
+  useEffect(() => {
+    console.log('Mounting Builder');
+
+    return () => console.log('unmounting Builder');
+  }, []);
+
   return (
     <>
       <div ref={headerElement}>

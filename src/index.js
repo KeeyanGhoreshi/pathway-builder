@@ -7,4 +7,9 @@ import App from 'components/App';
 
 import './styles/index.scss';
 
+const whyDidYouRender = require('@welldone-software/why-did-you-render');
+whyDidYouRender(React, {
+  trackAllPureComponents: true
+});
+
 ReactDOM.render(<App />, document.getElementById('root'));
