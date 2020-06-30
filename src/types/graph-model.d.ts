@@ -18,12 +18,16 @@ declare module 'graph-model' {
   }
 
   export interface NodeCoordinates {
-    [key: string]: Coordinate & { width?: number };
+    [key: string]: CoordinateWithWidth;
   }
 
   export interface Coordinate {
     x: number;
     y: number;
+  }
+
+  export interface CoordinateWithWidth extends Coordinate {
+    width?: number;
   }
 
   export interface Edges {

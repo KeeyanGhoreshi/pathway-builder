@@ -18,6 +18,7 @@ import { Layout, NodeDimensions, NodeCoordinates, Edges } from 'graph-model';
 import styles from './Graph.module.scss';
 import ResizeSensor from 'css-element-queries/src/ResizeSensor';
 import { isBranchState } from 'utils/nodeUtils';
+import TestComponent from 'components/TestComponent';
 
 interface GraphProps {
   pathway: Pathway;
@@ -188,6 +189,48 @@ interface GraphMemoProps {
   currentNode: State;
 }
 
+const areEqual = (prevProps: GraphMemoProps, nextProps: GraphMemoProps) => {
+  if (prevProps.graphElement !== nextProps.graphElement) return false;
+  if (prevProps.interactive !== nextProps.interactive) return false;
+  if (prevProps.maxHeight !== nextProps.maxHeight) return false;
+  if (prevProps.pathway !== nextProps.pathway) return false;
+  if (prevProps.nodeRefs !== nextProps.nodeRefs) return false;
+  if (prevProps.parentWidth !== nextProps.parentWidth) return false;
+  if (prevProps.maxWidth !== nextProps.maxWidth) return false;
+  if (prevProps.expanded !== nextProps.expanded) return false;
+  if (prevProps.toggleExpanded !== nextProps.toggleExpanded) return false;
+  if (prevProps.currentNode !== nextProps.currentNode) return false;
+
+  // Check if nodeCoordinates have same values but different object
+  if (prevProps.nodeCoordinates !== nextProps.nodeCoordinates) {
+    Object.keys(prevProps.nodeCoordinates).forEach(nodeKey => {
+      if (!(nodeKey in nextProps.nodeCoordinates)) return false;
+
+      let prevCoordinate = prevProps.nodeCoordinates[nodeKey];
+      let nextCoordinate = nextProps.nodeCoordinates[nodeKey];
+      if (prevCoordinate.x !== nextCoordinate.x) return false;
+      if (prevCoordinate.y !== nextCoordinate.y) return false;
+      if (prevCoordinate.width !== nextCoordinate.width) return false;
+    });
+  }
+
+  // Check if edges have same values but different object
+  if (prevProps.edges !== nextProps.edges) {
+    Object.keys(prevProps.edges).forEach(edgeKey => {
+      if (!(edgeKey in nextProps.edges)) return false;
+
+      let prevEdge = prevProps.edges[edgeKey];
+      let nextEdge = nextProps.edges[edgeKey];
+      if (prevEdge.start !== nextEdge.start) return false;
+      if (prevEdge.end !== nextEdge.end) return false;
+      if (prevEdge.label !== nextEdge.label) return false;
+      if (prevEdge.points !== nextEdge.points) return false;
+    });
+  }
+
+  return true;
+};
+
 const GraphMemo: FC<GraphMemoProps> = memo(
   ({
     graphElement,
@@ -256,6 +299,12 @@ const GraphMemo: FC<GraphMemoProps> = memo(
                   expanded={Boolean(expanded[nodeName])}
                   onClick={onClickHandler}
                 />
+                // <TestComponent
+                //   key={nodeName}
+                //   nodeKey={nodeName}
+                //   xCoordinate={nodeCoordinates[nodeName].x + parentWidth / 2}
+                //   yCoordinate={nodeCoordinates[nodeName].y}
+                // />
               );
             })
           : []}
@@ -288,7 +337,8 @@ const GraphMemo: FC<GraphMemoProps> = memo(
         </svg>
       </div>
     );
-  }
+  },
+  areEqual
 );
 
 export default Graph;
