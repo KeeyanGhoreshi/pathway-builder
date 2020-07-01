@@ -4,7 +4,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import styles from './Node.module.scss';
 import ExpandedNode from 'components/ExpandedNode';
-import { isGuidanceState } from 'utils/nodeUtils';
+import { isGuidanceState, isBranchState } from 'utils/nodeUtils';
 import { IconDefinition } from '@fortawesome/fontawesome-svg-core';
 import {
   faMicroscope,
@@ -18,43 +18,20 @@ import {
 
 interface NodeProps {
   nodeKey: string;
-  currentNodeKey: string;
   pathwayState: State;
   xCoordinate: number;
   yCoordinate: number;
-  isTransitionOfCurrentBranch: boolean;
   expanded?: boolean;
   onClick?: (nodeName: string) => void;
+  currentNode: State;
 }
 
 const Node: FC<NodeProps & { ref: Ref<HTMLDivElement> }> = memo(
   forwardRef<HTMLDivElement, NodeProps>(
     (
-      {
-        nodeKey,
-        currentNodeKey,
-        pathwayState,
-        xCoordinate,
-        yCoordinate,
-        isTransitionOfCurrentBranch,
-        expanded = false,
-        onClick
-      },
+      { nodeKey, pathwayState, xCoordinate, yCoordinate, expanded = false, onClick, currentNode },
       ref
     ) => {
-      let currentProps: any = {
-        nodeKey: nodeKey,
-        currentNodeKey: currentNodeKey,
-        pathwayState: pathwayState,
-        xCoordinate: xCoordinate,
-        yCoordinate: yCoordinate,
-        isTransitionOfCurrentBranch: isTransitionOfCurrentBranch,
-        expanded: expanded
-      };
-      if (onClick) currentProps.onClick = onClick.toString();
-      console.log('Rendering Node: ' + nodeKey);
-      console.log(currentProps);
-
       const [hasMetadata, setHasMetadata] = useState<boolean>(
         isGuidanceState(pathwayState) ? pathwayState.action.length > 0 : false
       );
@@ -65,7 +42,6 @@ const Node: FC<NodeProps & { ref: Ref<HTMLDivElement> }> = memo(
 
       useEffect(() => {
         if (!hasMetadata && isGuidanceState(pathwayState) && pathwayState.action.length > 0) {
-          console.log('updating node state: ' + nodeKey);
           setHasMetadata(true);
           if (!expanded) {
             onClickHandler();
@@ -73,19 +49,15 @@ const Node: FC<NodeProps & { ref: Ref<HTMLDivElement> }> = memo(
         }
       }, [hasMetadata, pathwayState, setHasMetadata, onClickHandler, expanded]);
 
-      useEffect(() => {
-        console.log('mounting Node: ' + nodeKey);
-
-        return () => console.log('unmounting node: ' + nodeKey);
-      }, []);
-
       const { label } = pathwayState;
       const style = {
         top: yCoordinate,
         left: xCoordinate
       };
 
-      const isCurrentNode = pathwayState.key === currentNodeKey;
+      const isCurrentNode = pathwayState.key === currentNode.key;
+      const isTransitionOfCurrentBranch =
+        isBranchState(currentNode) && currentNode.transitions.some(e => e?.transition === nodeKey);
 
       const isActionable = isCurrentNode;
       const topLevelClasses = [styles.node];
@@ -119,44 +91,7 @@ const Node: FC<NodeProps & { ref: Ref<HTMLDivElement> }> = memo(
         </div>
       );
     }
-  ),
-  (prevProps: NodeProps, nextProps: NodeProps) => {
-    if (prevProps.nodeKey !== nextProps.nodeKey) {
-      console.log('NodeKey Changed for node' + nextProps.nodeKey);
-      return false;
-    }
-    if (prevProps.currentNodeKey !== prevProps.currentNodeKey) {
-      console.log('CurrentNodeKey Changed for node' + nextProps.nodeKey);
-      return false;
-    }
-    if (prevProps.pathwayState !== nextProps.pathwayState) {
-      console.log('Pathway State Changed for node' + nextProps.nodeKey);
-      return false;
-    }
-    if (prevProps.xCoordinate !== nextProps.xCoordinate) {
-      console.log('xCoordinate Changed for node' + nextProps.nodeKey);
-      return false;
-    }
-    if (prevProps.yCoordinate !== nextProps.yCoordinate) {
-      console.log('yCood=rdinate Changed for node' + nextProps.nodeKey);
-      return false;
-    }
-    if (prevProps.isTransitionOfCurrentBranch !== nextProps.isTransitionOfCurrentBranch) {
-      console.log('isTransiton Changed for node' + nextProps.nodeKey);
-      return false;
-    }
-    if (prevProps.expanded !== nextProps.expanded) {
-      console.log('expanded Changed for node' + nextProps.nodeKey);
-      return false;
-    }
-    if (prevProps.onClick !== nextProps.onClick) {
-      console.log('onClick Changed for node' + nextProps.nodeKey);
-      return false;
-    }
-
-    console.log('Nothing changed for node' + nextProps.nodeKey);
-    return true;
-  }
+  )
 );
 
 interface NodeIconProps {
@@ -196,10 +131,6 @@ const StatusIcon: FC<StatusIconProps> = ({ status }) => {
       <FontAwesomeIcon icon={icon} className={styles.icon} />
     </div>
   );
-};
-
-Node.whyDidYouRender = {
-  logOnDifferentValues: true
 };
 
 export default Node;

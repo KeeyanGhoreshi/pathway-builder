@@ -5,7 +5,7 @@ import { ThemeProvider as MuiThemeProvider } from '@material-ui/core/styles';
 import Header from 'components/Header';
 import Navigation from 'components/Navigation';
 import Sidebar from 'components/Sidebar';
-import Graph from 'components/Graph';
+import Graph from 'components/DagreGraph';
 import { useTheme } from 'components/ThemeProvider';
 
 import styles from './Builder.module.scss';
@@ -28,12 +28,6 @@ const Builder: FC<BuilderProps> = ({ pathway, updatePathway, currentNode }) => {
         window.innerHeight - headerElement.current.clientHeight + 'px';
   }, [pathway, headerElement, graphContainerElement]);
 
-  useEffect(() => {
-    console.log('Mounting Builder');
-
-    return () => console.log('unmounting Builder');
-  }, []);
-
   return (
     <>
       <div ref={headerElement}>
@@ -52,7 +46,7 @@ const Builder: FC<BuilderProps> = ({ pathway, updatePathway, currentNode }) => {
         </MuiThemeProvider>
 
         <div ref={graphContainerElement} className={styles.graph}>
-          <Graph pathway={pathway} expandCurrentNode={true} currentNode={currentNode} />
+          <Graph pathway={pathway} currentNode={currentNode} />
         </div>
       </div>
     </>
