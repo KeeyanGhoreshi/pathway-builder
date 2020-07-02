@@ -298,7 +298,7 @@ const ActionNode: FC<ActionNodeProps> = ({
                   ) : (
                     <SidebarButton
                       buttonName="Validate"
-                      buttonIcon={<FontAwesomeIcon icon={faCheckCircle} />}
+                      buttonIcon={faCheckCircle}
                       buttonText={display || 'Check validation of the input system and code'}
                       onClick={validateFunction}
                     />
@@ -348,14 +348,14 @@ const ActionNode: FC<ActionNodeProps> = ({
           {changeNodeTypeEnabled && <hr className={styles.divider} />}
           <SidebarButton
             buttonName="Add Action Node"
-            buttonIcon={<FontAwesomeIcon icon={faPlus} />}
+            buttonIcon={faPlus}
             buttonText="Any clinical or workflow step which is not a decision."
             onClick={(): void => addNode('action')}
           />
 
           <SidebarButton
             buttonName="Add Branch Node"
-            buttonIcon={<FontAwesomeIcon icon={faPlus} />}
+            buttonIcon={faPlus}
             buttonText="A logical branching point based on clinical or workflow criteria."
             onClick={(): void => addNode('branch')}
           />

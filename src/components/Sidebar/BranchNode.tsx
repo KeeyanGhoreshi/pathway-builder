@@ -68,7 +68,7 @@ const BranchNode: FC<BranchNodeProps> = ({
 
       <SidebarButton
         buttonName="Add Transition"
-        buttonIcon={<FontAwesomeIcon icon={faPlus} />}
+        buttonIcon={faPlus}
         buttonText="Add transition logic for a clinical decision within a workflow."
         onClick={handleAddTransition}
       />

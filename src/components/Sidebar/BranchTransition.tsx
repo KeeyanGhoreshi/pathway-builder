@@ -83,7 +83,7 @@ const BranchTransition: FC<BranchTransitionProps> = ({
       {!(useCriteriaSelected || transition.condition?.cql) && (
         <SidebarButton
           buttonName="Use Criteria"
-          buttonIcon={<FontAwesomeIcon icon={faPlus} />}
+          buttonIcon={faPlus}
           buttonText="Add previously built or imported criteria logic to branch node."
           onClick={handleUseCriteria}
         />
@@ -110,7 +110,7 @@ const BranchTransition: FC<BranchTransitionProps> = ({
 
       <SidebarButton
         buttonName="Build Criteria"
-        buttonIcon={<FontAwesomeIcon icon={faTools} />}
+        buttonIcon={faTools}
         buttonText="Create new criteria logic to add to branch node."
       />
     </>
