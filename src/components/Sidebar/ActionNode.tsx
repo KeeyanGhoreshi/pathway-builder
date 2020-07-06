@@ -193,7 +193,7 @@ const ActionNode: FC<ActionNodeProps> = ({
     [currentNode, pathway, updatePathway]
   );
 
-  const validateFunction = (): void => {
+  const validateFunction = useCallback((): void => {
     if (currentNode.key && currentNode.action.length) {
       const action = currentNode.action[0];
       if (action.resource.medicationCodeableConcept) {
@@ -209,7 +209,7 @@ const ActionNode: FC<ActionNodeProps> = ({
     } else {
       console.error('No Actions -- Cannot Validate');
     }
-  };
+  }, [currentNode, pathway, updatePathway]);
 
   const resetDisplay = (action: Action): void => {
     if (action.resource.medicationCodeableConcept) {
@@ -226,6 +226,10 @@ const ActionNode: FC<ActionNodeProps> = ({
       validateFunction();
     }
   };
+
+  const addBranchNode = useCallback((): void => addNode('branch'), [addNode]);
+
+  const addActionNode = useCallback((): void => addNode('action'), [addNode]);
 
   // The node has a key and is not the start node
   const changeNodeTypeEnabled = currentNode.key !== undefined && currentNode.key !== 'Start';
@@ -350,14 +354,14 @@ const ActionNode: FC<ActionNodeProps> = ({
             buttonName="Add Action Node"
             buttonIcon={faPlus}
             buttonText="Any clinical or workflow step which is not a decision."
-            onClick={(): void => addNode('action')}
+            onClick={addActionNode}
           />
 
           <SidebarButton
             buttonName="Add Branch Node"
             buttonIcon={faPlus}
             buttonText="A logical branching point based on clinical or workflow criteria."
-            onClick={(): void => addNode('branch')}
+            onClick={addBranchNode}
           />
         </>
       )}
