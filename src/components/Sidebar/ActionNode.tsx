@@ -1,7 +1,7 @@
 import React, { FC, memo, useCallback, ChangeEvent } from 'react';
 import { SidebarButton } from '.';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlus, faCheckCircle } from '@fortawesome/free-solid-svg-icons';
+import { faCheckCircle } from '@fortawesome/free-solid-svg-icons';
 import {
   setStateAction,
   createCQL,
@@ -49,12 +49,6 @@ const ActionNode: FC<ActionNodeProps> = ({
   changeNodeType,
   updatePathway
 }) => {
-  console.log({
-    pathway: pathway,
-    currentNode: currentNode,
-    changeNodeType: changeNodeType.toString(),
-    updatePathway: updatePathway.toString()
-  });
   const styles = useStyles();
   const selectNodeType = useCallback(
     (event: ChangeEvent<{ value: string }>): void => {
@@ -213,7 +207,7 @@ const ActionNode: FC<ActionNodeProps> = ({
     } else {
       console.error('No Actions -- Cannot Validate');
     }
-  }, [currentNode, pathway, updatePathway]);
+  }, [currentNode, pathway, updatePathway, addActionCQL]);
 
   const resetDisplay = (action: Action): void => {
     if (action.resource.medicationCodeableConcept) {

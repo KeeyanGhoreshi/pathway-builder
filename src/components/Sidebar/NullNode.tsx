@@ -1,7 +1,7 @@
 import React, { FC, memo, useCallback, ChangeEvent } from 'react';
 
 import DropDown from 'components/elements/DropDown';
-import { Pathway, State } from 'pathways-model';
+import { State } from 'pathways-model';
 
 const nodeTypeOptions = [
   { label: '', value: '' },
