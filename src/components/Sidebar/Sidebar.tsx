@@ -1,9 +1,9 @@
 import React, { FC, memo, useCallback, useState, useEffect, useRef, RefObject } from 'react';
 import { useHistory } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faChevronLeft, faChevronRight } from '@fortawesome/free-solid-svg-icons';
+import { faChevronLeft, faChevronRight, faPlus } from '@fortawesome/free-solid-svg-icons';
 
-import { SidebarHeader, BranchNode, ActionNode, NullNode } from '.';
+import { SidebarHeader, BranchNode, ActionNode, NullNode, SidebarButton } from '.';
 import { State, GuidanceState, BranchState, Pathway } from 'pathways-model';
 import { setStateNodeType, addTransition, createState, addState, getNodeType } from 'utils/builder';
 import useStyles from './styles';
@@ -57,6 +57,10 @@ const Sidebar: FC<SidebarProps> = ({ pathway, updatePathway, headerElement, curr
     [pathway, updatePathway, currentNodeKey, redirectToNode]
   );
 
+  const addBranchNode = useCallback((): void => addNode('branch'), [addNode]);
+
+  const addActionNode = useCallback((): void => addNode('action'), [addNode]);
+
   // Set the height of the sidebar container
   useEffect(() => {
     if (sidebarContainerElement?.current && headerElement?.current)
@@ -65,6 +69,8 @@ const Sidebar: FC<SidebarProps> = ({ pathway, updatePathway, headerElement, curr
   }, [isExpanded, headerElement]);
 
   const nodeType = getNodeType(pathway, currentNodeKey);
+  // If the node does not have transitions it can be added to
+  const displayAddButtons = currentNode.key !== undefined && currentNode.transitions.length === 0;
   return (
     <>
       {isExpanded && (
@@ -79,12 +85,7 @@ const Sidebar: FC<SidebarProps> = ({ pathway, updatePathway, headerElement, curr
           <hr className={styles.divider} />
 
           {nodeType === 'null' && (
-            <NullNode
-              pathway={pathway}
-              currentNode={currentNode}
-              changeNodeType={changeNodeType}
-              addNode={addNode}
-            />
+            <NullNode currentNode={currentNode} changeNodeType={changeNodeType} />
           )}
 
           {nodeType === 'action' && (
@@ -93,7 +94,6 @@ const Sidebar: FC<SidebarProps> = ({ pathway, updatePathway, headerElement, curr
               currentNode={currentNode as GuidanceState}
               changeNodeType={changeNodeType}
               updatePathway={updatePathway}
-              addNode={addNode}
             />
           )}
 
@@ -104,6 +104,24 @@ const Sidebar: FC<SidebarProps> = ({ pathway, updatePathway, headerElement, curr
               changeNodeType={changeNodeType}
               updatePathway={updatePathway}
             />
+          )}
+          {displayAddButtons && (
+            <>
+              {currentNode.key !== 'Start' && <hr className={styles.divider} />}
+              <SidebarButton
+                buttonName="Add Action Node"
+                buttonIcon={faPlus}
+                buttonText="Any clinical or workflow step which is not a decision."
+                onClick={addActionNode}
+              />
+
+              <SidebarButton
+                buttonName="Add Branch Node"
+                buttonIcon={faPlus}
+                buttonText="A logical branching point based on clinical or workflow criteria."
+                onClick={addBranchNode}
+              />
+            </>
           )}
         </div>
       )}

@@ -15,6 +15,8 @@ interface SidebarButtonProps {
 const SidebarButton: FC<SidebarButtonProps> = ({ buttonName, buttonIcon, buttonText, onClick }) => {
   const styles = useStyles();
 
+  if (onClick) console.log(onClick.toString());
+
   return (
     <div className={styles.sidebarButtonGroup}>
       <Button

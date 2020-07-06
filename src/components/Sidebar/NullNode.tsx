@@ -10,13 +10,11 @@ const nodeTypeOptions = [
 ];
 
 interface NullNodeProps {
-  pathway: Pathway;
   currentNode: State;
   changeNodeType: (event: string) => void;
-  addNode: (event: string) => void;
 }
 
-const NullNode: FC<NullNodeProps> = ({ pathway, currentNode, changeNodeType, addNode }) => {
+const NullNode: FC<NullNodeProps> = ({ currentNode, changeNodeType }) => {
   const selectNodeType = useCallback(
     (event: ChangeEvent<{ value: string }>): void => {
       changeNodeType(event?.target.value || '');

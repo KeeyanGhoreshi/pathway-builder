@@ -40,7 +40,6 @@ interface ActionNodeProps {
   pathway: Pathway;
   currentNode: GuidanceState;
   changeNodeType: (event: string) => void;
-  addNode: (event: string) => void;
   updatePathway: (pathway: Pathway) => void;
 }
 
@@ -48,9 +47,14 @@ const ActionNode: FC<ActionNodeProps> = ({
   pathway,
   currentNode,
   changeNodeType,
-  addNode,
   updatePathway
 }) => {
+  console.log({
+    pathway: pathway,
+    currentNode: currentNode,
+    changeNodeType: changeNodeType.toString(),
+    updatePathway: updatePathway.toString()
+  });
   const styles = useStyles();
   const selectNodeType = useCallback(
     (event: ChangeEvent<{ value: string }>): void => {
@@ -227,13 +231,8 @@ const ActionNode: FC<ActionNodeProps> = ({
     }
   };
 
-  const addBranchNode = useCallback((): void => addNode('branch'), [addNode]);
-
-  const addActionNode = useCallback((): void => addNode('action'), [addNode]);
-
   // The node has a key and is not the start node
   const changeNodeTypeEnabled = currentNode.key !== undefined && currentNode.key !== 'Start';
-
   const action = currentNode.action;
   const resource = action?.length > 0 && action[0].resource;
   let system = '';
@@ -252,8 +251,7 @@ const ActionNode: FC<ActionNodeProps> = ({
   } else {
     display = resource.description;
   }
-  // If the node does not have transitions it can be added to
-  const displayAddButtons = currentNode.key !== undefined && currentNode.transitions.length === 0;
+
   return (
     <>
       {changeNodeTypeEnabled && (
@@ -345,24 +343,6 @@ const ActionNode: FC<ActionNodeProps> = ({
               )}
             </>
           )}
-        </>
-      )}
-      {displayAddButtons && (
-        <>
-          {changeNodeTypeEnabled && <hr className={styles.divider} />}
-          <SidebarButton
-            buttonName="Add Action Node"
-            buttonIcon={faPlus}
-            buttonText="Any clinical or workflow step which is not a decision."
-            onClick={addActionNode}
-          />
-
-          <SidebarButton
-            buttonName="Add Branch Node"
-            buttonIcon={faPlus}
-            buttonText="A logical branching point based on clinical or workflow criteria."
-            onClick={addBranchNode}
-          />
         </>
       )}
     </>
