@@ -16,7 +16,7 @@ interface SidebarProps {
 }
 
 const Sidebar: FC<SidebarProps> = ({ updatePathway, headerElement, currentNode }) => {
-  const { pathway, pathwayRef } = useCurrentPathwayContext();
+  const { pathwayRef } = useCurrentPathwayContext();
   const [isExpanded, setIsExpanded] = useState<boolean>(true);
   const styles = useStyles();
   const history = useHistory();
@@ -29,7 +29,7 @@ const Sidebar: FC<SidebarProps> = ({ updatePathway, headerElement, currentNode }
 
   const changeNodeType = useCallback(
     (nodeType: string): void => {
-      if (currentNodeKey)
+      if (currentNodeKey && pathwayRef.current)
         updatePathway(setStateNodeType(pathwayRef.current, currentNodeKey, nodeType));
     },
     [pathwayRef, updatePathway, currentNodeKey]
@@ -37,6 +37,8 @@ const Sidebar: FC<SidebarProps> = ({ updatePathway, headerElement, currentNode }
 
   const redirectToNode = useCallback(
     nodeKey => {
+      if (!pathwayRef.current) return;
+
       const url = `/builder/${encodeURIComponent(pathwayRef.current.id)}/node/${encodeURIComponent(
         nodeKey
       )}`;
@@ -49,7 +51,7 @@ const Sidebar: FC<SidebarProps> = ({ updatePathway, headerElement, currentNode }
 
   const addNode = useCallback(
     (nodeType: string): void => {
-      if (!currentNodeKey) return;
+      if (!currentNodeKey || !pathwayRef.current) return;
 
       const newState = createState();
       let newPathway = addState(pathwayRef.current, newState);
@@ -73,9 +75,10 @@ const Sidebar: FC<SidebarProps> = ({ updatePathway, headerElement, currentNode }
   }, [isExpanded, headerElement]);
 
   useEffect(() => {
-    console.log(pathway);
     console.log(pathwayRef.current);
-  }, [pathway, pathwayRef]);
+  }, [pathwayRef]);
+
+  if (!pathwayRef.current) return <div>Error: No pathway</div>;
 
   const nodeType = getNodeType(pathwayRef.current, currentNodeKey);
   // If the node does not have transitions it can be added to

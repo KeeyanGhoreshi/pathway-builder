@@ -42,7 +42,8 @@ const SidebarHeader: FC<SidebarHeaderProps> = ({ currentNode, updatePathway, isT
 
   const changeNodeLabel = useCallback(() => {
     const label = inputRef.current?.value ?? '';
-    if (currentNodeKey) updatePathway(setStateLabel(pathwayRef.current, currentNodeKey, label));
+    if (currentNodeKey && pathwayRef.current)
+      updatePathway(setStateLabel(pathwayRef.current, currentNodeKey, label));
     setShowInput(false);
   }, [pathwayRef, updatePathway, currentNodeKey]);
 

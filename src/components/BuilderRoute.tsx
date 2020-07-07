@@ -1,4 +1,4 @@
-import React, { FC, memo, useMemo, useCallback } from 'react';
+import React, { FC, memo, useMemo, useCallback, useEffect } from 'react';
 import { Redirect, useParams } from 'react-router-dom';
 import { Pathway } from 'pathways-model';
 
@@ -25,10 +25,12 @@ const BuilderRoute: FC = () => {
     [pathwayIndex, updatePathwayAtIndex]
   );
 
+  useEffect(() => {
+    setPathway(pathway);
+  }, [pathway, setPathway]);
+
   if (pathway == null) return null;
   if (currentNode == null) return <Redirect to={`/builder/${id}/node/Start`} />;
-
-  setPathway(pathway);
 
   return <Builder updatePathway={updatePathway} currentNode={currentNode} />;
 };

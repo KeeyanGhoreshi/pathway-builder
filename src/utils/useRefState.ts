@@ -4,6 +4,8 @@ function useRefState<T>(initialValue: T): [T, MutableRefObject<T>, (value: T) =>
   const [state, setState] = useState<T>(initialValue);
   const stateRef = useRef(state);
   useEffect(() => {
+    console.log('updating ref state');
+    console.log(state);
     stateRef.current = state;
   }, [state]);
   return [state, stateRef, setState];

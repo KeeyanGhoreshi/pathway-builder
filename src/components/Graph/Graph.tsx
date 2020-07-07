@@ -55,7 +55,8 @@ const Graph: FC<GraphProps> = memo(({ interactive = true, currentNode }) => {
       });
     }
 
-    return graphLayout(pathway, nodeDimensions);
+    if (pathway) return graphLayout(pathway, nodeDimensions);
+    else return {} as Layout;
   }, [pathway]);
 
   const [layout, setLayout] = useState(getGraphLayout());
@@ -142,22 +143,24 @@ const Graph: FC<GraphProps> = memo(({ interactive = true, currentNode }) => {
     setLayout(getGraphLayout());
   }, [pathway, expanded, getGraphLayout]);
 
-  return (
-    <GraphMemo
-      graphElement={graphElement}
-      interactive={interactive}
-      maxHeight={maxHeight}
-      nodeCoordinates={nodeCoordinates}
-      edges={edges}
-      pathway={pathway}
-      nodeRefs={nodeRefs}
-      parentWidth={parentWidth}
-      maxWidth={maxWidth}
-      expanded={expanded}
-      toggleExpanded={toggleExpanded}
-      currentNode={currentNode}
-    />
-  );
+  if (!pathway) return <div>Error: No pathway loaded</div>;
+  else
+    return (
+      <GraphMemo
+        graphElement={graphElement}
+        interactive={interactive}
+        maxHeight={maxHeight}
+        nodeCoordinates={nodeCoordinates}
+        edges={edges}
+        pathway={pathway}
+        nodeRefs={nodeRefs}
+        parentWidth={parentWidth}
+        maxWidth={maxWidth}
+        expanded={expanded}
+        toggleExpanded={toggleExpanded}
+        currentNode={currentNode}
+      />
+    );
 });
 
 interface GraphMemoProps {

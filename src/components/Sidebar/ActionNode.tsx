@@ -55,9 +55,11 @@ const ActionNode: FC<ActionNodeProps> = ({ currentNode, changeNodeType, updatePa
 
   const addActionCQL = useCallback(
     (action: Action, currentNodeKey: string): void => {
+      if (!pathwayRef.current) return;
+
       const cql = createCQL(action, currentNodeKey);
       convertBasicCQL(cql).then(elm => {
-        updatePathway(setGuidanceStateElm(pathwayRef.current, currentNodeKey, elm as ElmLibrary));
+        updatePathway(setGuidanceStateElm(pathwayRef.current!, currentNodeKey, elm as ElmLibrary));
       });
     },
     [pathwayRef, updatePathway]
@@ -65,7 +67,7 @@ const ActionNode: FC<ActionNodeProps> = ({ currentNode, changeNodeType, updatePa
 
   const changeCode = useCallback(
     (event: ChangeEvent<{ value: string }>): void => {
-      if (!currentNode.key) return;
+      if (!currentNode.key || !pathwayRef.current) return;
 
       const code = event?.target.value || '';
       const action: Action = currentNode.action[0];
@@ -82,7 +84,7 @@ const ActionNode: FC<ActionNodeProps> = ({ currentNode, changeNodeType, updatePa
 
   const changeDescription = useCallback(
     (event: ChangeEvent<{ value: string }>): void => {
-      if (!currentNode.key) return;
+      if (!currentNode.key || !pathwayRef.current) return;
 
       const description = event?.target.value || '';
       const actionId = currentNode.action[0].id; // TODO: change this for supporting multiple action
@@ -96,7 +98,7 @@ const ActionNode: FC<ActionNodeProps> = ({ currentNode, changeNodeType, updatePa
 
   const changeTitle = useCallback(
     (event: ChangeEvent<{ value: string }>): void => {
-      if (!currentNode.key) return;
+      if (!currentNode.key || !pathwayRef.current) return;
 
       const title = event?.target.value || '';
       const action = currentNode.action[0];
@@ -111,7 +113,7 @@ const ActionNode: FC<ActionNodeProps> = ({ currentNode, changeNodeType, updatePa
 
   const selectActionType = useCallback(
     (event: ChangeEvent<{ value: string }>): void => {
-      if (!currentNode.key) return;
+      if (!currentNode.key || !pathwayRef.current) return;
       const value = event?.target.value || '';
       const actionType = actionTypeOptions.find(option => {
         return option.value === value;
@@ -172,7 +174,7 @@ const ActionNode: FC<ActionNodeProps> = ({ currentNode, changeNodeType, updatePa
 
   const selectCodeSystem = useCallback(
     (event: ChangeEvent<{ value: string }>): void => {
-      if (!currentNode.key) return;
+      if (!currentNode.key || !pathwayRef.current) return;
 
       const codeSystem = event?.target.value || '';
       const action = currentNode.action[0];
@@ -188,7 +190,7 @@ const ActionNode: FC<ActionNodeProps> = ({ currentNode, changeNodeType, updatePa
   );
 
   const validateFunction = useCallback((): void => {
-    if (currentNode.key && currentNode.action.length) {
+    if (currentNode.key && currentNode.action.length && pathwayRef.current) {
       const action = currentNode.action[0];
       if (action.resource.medicationCodeableConcept) {
         action.resource.medicationCodeableConcept.coding[0].display = 'Example display text';

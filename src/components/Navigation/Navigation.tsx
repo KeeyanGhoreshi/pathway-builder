@@ -49,7 +49,8 @@ const Navigation: FC = () => {
       >
         <MenuItem
           onClick={(): void => {
-            downloadPathway(pathway);
+            if (pathway) downloadPathway(pathway);
+            else alert('No pathway to download!');
             closeMenu();
           }}
         >

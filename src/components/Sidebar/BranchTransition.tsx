@@ -25,7 +25,7 @@ const BranchTransition: FC<BranchTransitionProps> = ({
   const criteriaOptions = criteria.map(c => ({ value: c.id, label: c.label }));
   const styles = useStyles();
   const transitionKey = transition?.transition || '';
-  const transitionNode = pathway.states[transitionKey];
+  const transitionNode = pathway?.states[transitionKey];
   const [useCriteriaSelected, setUseCriteriaSelected] = useState<boolean>(false);
 
   const handleUseCriteria = useCallback((): void => {
@@ -34,7 +34,7 @@ const BranchTransition: FC<BranchTransitionProps> = ({
 
   const selectCriteriaSource = useCallback(
     (event: ChangeEvent<{ value: string }>): void => {
-      if (!currentNodeKey || !transition.id) return;
+      if (!currentNodeKey || !transition.id || !pathwayRef.current) return;
 
       const criteriaSource = event?.target.value || '';
       let elm = undefined;
@@ -60,7 +60,7 @@ const BranchTransition: FC<BranchTransitionProps> = ({
 
   const setCriteriaDisplay = useCallback(
     (event: ChangeEvent<{ value: string }>): void => {
-      if (!currentNodeKey || !transition.id) return;
+      if (!currentNodeKey || !transition.id || !pathwayRef.current) return;
 
       const criteriaDisplay = event?.target.value || '';
       updatePathway(
@@ -78,11 +78,14 @@ const BranchTransition: FC<BranchTransitionProps> = ({
     <>
       <hr className={styles.divider} />
 
-      <SidebarHeader
-        currentNode={transitionNode}
-        updatePathway={updatePathway}
-        isTransition={true}
-      />
+      {transitionNode && (
+        <SidebarHeader
+          currentNode={transitionNode}
+          updatePathway={updatePathway}
+          isTransition={true}
+        />
+      )}
+
       {!(useCriteriaSelected || transition.condition?.cql) && (
         <SidebarButton
           buttonName="Use Criteria"

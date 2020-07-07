@@ -32,6 +32,8 @@ const BranchNode: FC<BranchNodeProps> = ({ currentNode, changeNodeType, updatePa
   );
 
   const handleAddTransition = useCallback((): void => {
+    if (!pathwayRef.current) return;
+
     const newState = createState();
 
     const newPathway = addState(pathwayRef.current, newState);
