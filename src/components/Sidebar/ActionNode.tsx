@@ -15,6 +15,7 @@ import useStyles from './styles';
 import shortid from 'shortid';
 import { TextField } from '@material-ui/core';
 import { convertBasicCQL } from 'engine/cql-to-elm';
+import { useCurrentPathwayContext } from 'components/CurrentPathwayProvider';
 
 const nodeTypeOptions = [
   { label: 'Action', value: 'action' },
@@ -37,18 +38,13 @@ const codeSystemOptions = [
 ];
 
 interface ActionNodeProps {
-  pathway: Pathway;
   currentNode: GuidanceState;
   changeNodeType: (event: string) => void;
   updatePathway: (pathway: Pathway) => void;
 }
 
-const ActionNode: FC<ActionNodeProps> = ({
-  pathway,
-  currentNode,
-  changeNodeType,
-  updatePathway
-}) => {
+const ActionNode: FC<ActionNodeProps> = ({ currentNode, changeNodeType, updatePathway }) => {
+  const { pathwayRef } = useCurrentPathwayContext();
   const styles = useStyles();
   const selectNodeType = useCallback(
     (event: ChangeEvent<{ value: string }>): void => {
@@ -61,10 +57,10 @@ const ActionNode: FC<ActionNodeProps> = ({
     (action: Action, currentNodeKey: string): void => {
       const cql = createCQL(action, currentNodeKey);
       convertBasicCQL(cql).then(elm => {
-        updatePathway(setGuidanceStateElm(pathway, currentNodeKey, elm as ElmLibrary));
+        updatePathway(setGuidanceStateElm(pathwayRef.current, currentNodeKey, elm as ElmLibrary));
       });
     },
-    [pathway, updatePathway]
+    [pathwayRef, updatePathway]
   );
 
   const changeCode = useCallback(
@@ -79,9 +75,9 @@ const ActionNode: FC<ActionNodeProps> = ({
         action.resource.code.coding[0].code = code;
       }
       resetDisplay(action);
-      updatePathway(setStateAction(pathway, currentNode.key, [action]));
+      updatePathway(setStateAction(pathwayRef.current, currentNode.key, [action]));
     },
-    [currentNode, pathway, updatePathway]
+    [currentNode, pathwayRef, updatePathway]
   );
 
   const changeDescription = useCallback(
@@ -91,11 +87,11 @@ const ActionNode: FC<ActionNodeProps> = ({
       const description = event?.target.value || '';
       const actionId = currentNode.action[0].id; // TODO: change this for supporting multiple action
       if (actionId) {
-        setActionDescription(pathway, currentNode.key, actionId, description);
-        updatePathway(setStateAction(pathway, currentNode.key, currentNode.action));
+        setActionDescription(pathwayRef.current, currentNode.key, actionId, description);
+        updatePathway(setStateAction(pathwayRef.current, currentNode.key, currentNode.action));
       }
     },
-    [currentNode, pathway, updatePathway]
+    [currentNode, pathwayRef, updatePathway]
   );
 
   const changeTitle = useCallback(
@@ -106,11 +102,11 @@ const ActionNode: FC<ActionNodeProps> = ({
       const action = currentNode.action[0];
       action.resource.title = title;
       resetDisplay(action);
-      updatePathway(setStateAction(pathway, currentNode.key, [action]));
+      updatePathway(setStateAction(pathwayRef.current, currentNode.key, [action]));
 
       addActionCQL(action, currentNode.key);
     },
-    [currentNode, pathway, updatePathway, addActionCQL]
+    [currentNode, pathwayRef, updatePathway, addActionCQL]
   );
 
   const selectActionType = useCallback(
@@ -169,9 +165,9 @@ const ActionNode: FC<ActionNodeProps> = ({
         };
       }
 
-      updatePathway(setStateAction(pathway, currentNode.key, [action]));
+      updatePathway(setStateAction(pathwayRef.current, currentNode.key, [action]));
     },
-    [currentNode, pathway, updatePathway]
+    [currentNode, pathwayRef, updatePathway]
   );
 
   const selectCodeSystem = useCallback(
@@ -186,9 +182,9 @@ const ActionNode: FC<ActionNodeProps> = ({
         action.resource.code.coding[0].system = codeSystem;
       }
       resetDisplay(action);
-      updatePathway(setStateAction(pathway, currentNode.key, [action]));
+      updatePathway(setStateAction(pathwayRef.current, currentNode.key, [action]));
     },
-    [currentNode, pathway, updatePathway]
+    [currentNode, pathwayRef, updatePathway]
   );
 
   const validateFunction = useCallback((): void => {
@@ -201,13 +197,13 @@ const ActionNode: FC<ActionNodeProps> = ({
       } else {
         action.resource.code.coding[0].display = 'Example display text'; // TODO: actually validate
       }
-      updatePathway(setStateAction(pathway, currentNode.key, [action]));
+      updatePathway(setStateAction(pathwayRef.current, currentNode.key, [action]));
 
       addActionCQL(action, currentNode.key);
     } else {
       console.error('No Actions -- Cannot Validate');
     }
-  }, [currentNode, pathway, updatePathway, addActionCQL]);
+  }, [currentNode, pathwayRef, updatePathway, addActionCQL]);
 
   const resetDisplay = (action: Action): void => {
     if (action.resource.medicationCodeableConcept) {

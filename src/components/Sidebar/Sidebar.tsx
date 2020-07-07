@@ -7,15 +7,16 @@ import { SidebarHeader, BranchNode, ActionNode, NullNode, SidebarButton } from '
 import { State, GuidanceState, BranchState, Pathway } from 'pathways-model';
 import { setStateNodeType, addTransition, createState, addState, getNodeType } from 'utils/builder';
 import useStyles from './styles';
+import { useCurrentPathwayContext } from 'components/CurrentPathwayProvider';
 
 interface SidebarProps {
-  pathway: Pathway;
   updatePathway: (pathway: Pathway) => void;
   headerElement: RefObject<HTMLDivElement>;
   currentNode: GuidanceState | BranchState | State;
 }
 
-const Sidebar: FC<SidebarProps> = ({ pathway, updatePathway, headerElement, currentNode }) => {
+const Sidebar: FC<SidebarProps> = ({ updatePathway, headerElement, currentNode }) => {
+  const { pathway, pathwayRef } = useCurrentPathwayContext();
   const [isExpanded, setIsExpanded] = useState<boolean>(true);
   const styles = useStyles();
   const history = useHistory();
@@ -28,19 +29,22 @@ const Sidebar: FC<SidebarProps> = ({ pathway, updatePathway, headerElement, curr
 
   const changeNodeType = useCallback(
     (nodeType: string): void => {
-      if (currentNodeKey) updatePathway(setStateNodeType(pathway, currentNodeKey, nodeType));
+      if (currentNodeKey)
+        updatePathway(setStateNodeType(pathwayRef.current, currentNodeKey, nodeType));
     },
-    [pathway, updatePathway, currentNodeKey]
+    [pathwayRef, updatePathway, currentNodeKey]
   );
 
   const redirectToNode = useCallback(
     nodeKey => {
-      const url = `/builder/${encodeURIComponent(pathway.id)}/node/${encodeURIComponent(nodeKey)}`;
+      const url = `/builder/${encodeURIComponent(pathwayRef.current.id)}/node/${encodeURIComponent(
+        nodeKey
+      )}`;
       if (url !== history.location.pathname) {
         history.push(url);
       }
     },
-    [history, pathway.id]
+    [history, pathwayRef]
   );
 
   const addNode = useCallback(
@@ -48,13 +52,13 @@ const Sidebar: FC<SidebarProps> = ({ pathway, updatePathway, headerElement, curr
       if (!currentNodeKey) return;
 
       const newState = createState();
-      let newPathway = addState(pathway, newState);
+      let newPathway = addState(pathwayRef.current, newState);
       newPathway = addTransition(newPathway, currentNodeKey, newState.key as string);
       newPathway = setStateNodeType(newPathway, newState.key as string, nodeType);
       updatePathway(newPathway);
       redirectToNode(newState.key);
     },
-    [pathway, updatePathway, currentNodeKey, redirectToNode]
+    [pathwayRef, updatePathway, currentNodeKey, redirectToNode]
   );
 
   const addBranchNode = useCallback((): void => addNode('branch'), [addNode]);
@@ -68,7 +72,12 @@ const Sidebar: FC<SidebarProps> = ({ pathway, updatePathway, headerElement, curr
         window.innerHeight - headerElement.current.clientHeight + 'px';
   }, [isExpanded, headerElement]);
 
-  const nodeType = getNodeType(pathway, currentNodeKey);
+  useEffect(() => {
+    console.log(pathway);
+    console.log(pathwayRef.current);
+  }, [pathway, pathwayRef]);
+
+  const nodeType = getNodeType(pathwayRef.current, currentNodeKey);
   // If the node does not have transitions it can be added to
   const displayAddButtons = currentNode.key !== undefined && currentNode.transitions.length === 0;
   return (
@@ -76,7 +85,6 @@ const Sidebar: FC<SidebarProps> = ({ pathway, updatePathway, headerElement, curr
       {isExpanded && (
         <div className={styles.root} ref={sidebarContainerElement}>
           <SidebarHeader
-            pathway={pathway}
             currentNode={currentNode}
             updatePathway={updatePathway}
             isTransition={false}
@@ -90,7 +98,6 @@ const Sidebar: FC<SidebarProps> = ({ pathway, updatePathway, headerElement, curr
 
           {nodeType === 'action' && (
             <ActionNode
-              pathway={pathway}
               currentNode={currentNode as GuidanceState}
               changeNodeType={changeNodeType}
               updatePathway={updatePathway}
@@ -99,7 +106,6 @@ const Sidebar: FC<SidebarProps> = ({ pathway, updatePathway, headerElement, curr
 
           {nodeType === 'branch' && (
             <BranchNode
-              pathway={pathway}
               currentNode={currentNode}
               changeNodeType={changeNodeType}
               updatePathway={updatePathway}

@@ -7,21 +7,21 @@ import { SidebarHeader, SidebarButton } from '.';
 import { Pathway, Transition } from 'pathways-model';
 import { useCriteriaContext } from 'components/CriteriaProvider';
 import useStyles from './styles';
+import { useCurrentPathwayContext } from 'components/CurrentPathwayProvider';
 
 interface BranchTransitionProps {
-  pathway: Pathway;
   currentNodeKey: string;
   transition: Transition;
   updatePathway: (pathway: Pathway) => void;
 }
 
 const BranchTransition: FC<BranchTransitionProps> = ({
-  pathway,
   currentNodeKey,
   transition,
   updatePathway
 }) => {
   const { criteria } = useCriteriaContext();
+  const { pathway, pathwayRef } = useCurrentPathwayContext();
   const criteriaOptions = criteria.map(c => ({ value: c.id, label: c.label }));
   const styles = useStyles();
   const transitionKey = transition?.transition || '';
@@ -46,7 +46,7 @@ const BranchTransition: FC<BranchTransitionProps> = ({
       if (!elm) return;
       updatePathway(
         setTransitionCondition(
-          pathway,
+          pathwayRef.current,
           currentNodeKey,
           transition.id,
           transition.condition?.description || '',
@@ -55,7 +55,7 @@ const BranchTransition: FC<BranchTransitionProps> = ({
         )
       );
     },
-    [currentNodeKey, transition.id, updatePathway, pathway, transition.condition, criteria]
+    [currentNodeKey, transition.id, updatePathway, pathwayRef, transition.condition, criteria]
   );
 
   const setCriteriaDisplay = useCallback(
@@ -64,17 +64,21 @@ const BranchTransition: FC<BranchTransitionProps> = ({
 
       const criteriaDisplay = event?.target.value || '';
       updatePathway(
-        setTransitionConditionDescription(pathway, currentNodeKey, transition.id, criteriaDisplay)
+        setTransitionConditionDescription(
+          pathwayRef.current,
+          currentNodeKey,
+          transition.id,
+          criteriaDisplay
+        )
       );
     },
-    [currentNodeKey, transition.id, updatePathway, pathway]
+    [currentNodeKey, transition.id, updatePathway, pathwayRef]
   );
   return (
     <>
       <hr className={styles.divider} />
 
       <SidebarHeader
-        pathway={pathway}
         currentNode={transitionNode}
         updatePathway={updatePathway}
         isTransition={true}

@@ -6,6 +6,7 @@ import DropDown from 'components/elements/DropDown';
 import { addTransition, createState, addState } from 'utils/builder';
 import { Pathway, State } from 'pathways-model';
 import useStyles from './styles';
+import { useCurrentPathwayContext } from 'components/CurrentPathwayProvider';
 
 const nodeTypeOptions = [
   { value: 'action', label: 'Action' },
@@ -13,18 +14,13 @@ const nodeTypeOptions = [
 ];
 
 interface BranchNodeProps {
-  pathway: Pathway;
   currentNode: State;
   changeNodeType: (event: string) => void;
   updatePathway: (pathway: Pathway) => void;
 }
 
-const BranchNode: FC<BranchNodeProps> = ({
-  pathway,
-  currentNode,
-  changeNodeType,
-  updatePathway
-}) => {
+const BranchNode: FC<BranchNodeProps> = ({ currentNode, changeNodeType, updatePathway }) => {
+  const { pathwayRef } = useCurrentPathwayContext();
   const currentNodeKey = currentNode?.key;
   const styles = useStyles();
 
@@ -38,9 +34,9 @@ const BranchNode: FC<BranchNodeProps> = ({
   const handleAddTransition = useCallback((): void => {
     const newState = createState();
 
-    const newPathway = addState(pathway, newState);
+    const newPathway = addState(pathwayRef.current, newState);
     updatePathway(addTransition(newPathway, currentNodeKey || '', newState.key as string));
-  }, [pathway, updatePathway, currentNodeKey]);
+  }, [pathwayRef, updatePathway, currentNodeKey]);
 
   return (
     <>
@@ -55,7 +51,6 @@ const BranchNode: FC<BranchNodeProps> = ({
         return (
           <BranchTransition
             key={transition.id}
-            pathway={pathway}
             currentNodeKey={currentNodeKey || ''}
             transition={transition}
             updatePathway={updatePathway}

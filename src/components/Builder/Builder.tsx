@@ -11,12 +11,11 @@ import { useTheme } from 'components/ThemeProvider';
 import styles from './Builder.module.scss';
 
 interface BuilderProps {
-  pathway: Pathway;
   updatePathway: (pathway: Pathway) => void;
   currentNode: State;
 }
 
-const Builder: FC<BuilderProps> = ({ pathway, updatePathway, currentNode }) => {
+const Builder: FC<BuilderProps> = ({ updatePathway, currentNode }) => {
   const headerElement = useRef<HTMLDivElement>(null);
   const graphContainerElement = useRef<HTMLDivElement>(null);
   const theme = useTheme('dark');
@@ -26,19 +25,18 @@ const Builder: FC<BuilderProps> = ({ pathway, updatePathway, currentNode }) => {
     if (graphContainerElement?.current && headerElement?.current)
       graphContainerElement.current.style.height =
         window.innerHeight - headerElement.current.clientHeight + 'px';
-  }, [pathway, headerElement, graphContainerElement]);
+  }, [headerElement, graphContainerElement]);
 
   return (
     <>
       <div ref={headerElement}>
         <Header />
-        <Navigation pathway={pathway} />
+        <Navigation />
       </div>
 
       <div className={styles.display}>
         <MuiThemeProvider theme={theme}>
           <Sidebar
-            pathway={pathway}
             updatePathway={updatePathway}
             headerElement={headerElement}
             currentNode={currentNode}
@@ -46,7 +44,7 @@ const Builder: FC<BuilderProps> = ({ pathway, updatePathway, currentNode }) => {
         </MuiThemeProvider>
 
         <div ref={graphContainerElement} className={styles.graph}>
-          <Graph pathway={pathway} expandCurrentNode={true} currentNode={currentNode} />
+          <Graph currentNode={currentNode} />
         </div>
       </div>
     </>

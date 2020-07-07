@@ -4,10 +4,12 @@ import { Pathway } from 'pathways-model';
 
 import Builder from 'components/Builder';
 import { usePathwayContext } from 'components/PathwayProvider';
+import { useCurrentPathwayContext } from './CurrentPathwayProvider';
 
 const BuilderRoute: FC = () => {
   const { id, nodeId } = useParams();
   const { pathways, updatePathwayAtIndex } = usePathwayContext();
+  const { setPathway } = useCurrentPathwayContext();
   const pathwayId = decodeURIComponent(id);
   const pathwayIndex = useMemo(() => pathways.findIndex(pathway => pathway.id === pathwayId), [
     pathwayId,
@@ -26,7 +28,9 @@ const BuilderRoute: FC = () => {
   if (pathway == null) return null;
   if (currentNode == null) return <Redirect to={`/builder/${id}/node/Start`} />;
 
-  return <Builder pathway={pathway} updatePathway={updatePathway} currentNode={currentNode} />;
+  setPathway(pathway);
+
+  return <Builder updatePathway={updatePathway} currentNode={currentNode} />;
 };
 
 export default memo(BuilderRoute);
