@@ -20,9 +20,10 @@ const BuilderRoute: FC = () => {
 
   const updatePathway = useCallback(
     (pathway: Pathway) => {
+      setPathway(pathway);
       updatePathwayAtIndex(pathway, pathwayIndex);
     },
-    [pathwayIndex, updatePathwayAtIndex]
+    [pathwayIndex, updatePathwayAtIndex, setPathway]
   );
 
   useEffect(() => {

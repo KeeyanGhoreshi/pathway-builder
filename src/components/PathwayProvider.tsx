@@ -27,10 +27,14 @@ interface PathwayProviderProps {
   children: ReactNode;
 }
 
-export const PathwayProvider: FC<PathwayProviderProps> = memo(({ children }) => {
+export const PathwayProvider: FC<PathwayProviderProps> = memo(function PathwayProvider({
+  children
+}) {
   const [pathways, setPathways] = useState<Pathway[]>([]);
   const service = useGetService<Pathway>(config.get('demoPathwaysService'));
   const servicePayload = (service as ServiceLoaded<Pathway[]>).payload;
+
+  if (pathways.length >= 3) console.log(JSON.stringify(pathways[2].states, undefined, 2));
 
   const addPathway = useCallback((pathway: Pathway) => {
     setPathways(currentPathways => [...currentPathways, pathway]);
@@ -41,6 +45,7 @@ export const PathwayProvider: FC<PathwayProviderProps> = memo(({ children }) => 
   }, []);
 
   const updatePathwayAtIndex = useCallback((pathway: Pathway, index: number) => {
+    // debugger;
     setPathways(currentPathways => [
       ...currentPathways.slice(0, index),
       pathway,

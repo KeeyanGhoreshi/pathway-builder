@@ -16,7 +16,7 @@ interface SidebarProps {
 }
 
 const Sidebar: FC<SidebarProps> = ({ updatePathway, headerElement, currentNode }) => {
-  const { pathwayRef } = useCurrentPathwayContext();
+  const { pathway, pathwayRef } = useCurrentPathwayContext();
   const [isExpanded, setIsExpanded] = useState<boolean>(true);
   const styles = useStyles();
   const history = useHistory();
@@ -74,13 +74,9 @@ const Sidebar: FC<SidebarProps> = ({ updatePathway, headerElement, currentNode }
         window.innerHeight - headerElement.current.clientHeight + 'px';
   }, [isExpanded, headerElement]);
 
-  useEffect(() => {
-    console.log(pathwayRef.current);
-  }, [pathwayRef]);
+  if (!pathway) return <div>Error: No pathway</div>;
 
-  if (!pathwayRef.current) return <div>Error: No pathway</div>;
-
-  const nodeType = getNodeType(pathwayRef.current, currentNodeKey);
+  const nodeType = getNodeType(pathway, currentNodeKey);
   // If the node does not have transitions it can be added to
   const displayAddButtons = currentNode.key !== undefined && currentNode.transitions.length === 0;
   return (
@@ -114,6 +110,7 @@ const Sidebar: FC<SidebarProps> = ({ updatePathway, headerElement, currentNode }
               updatePathway={updatePathway}
             />
           )}
+
           {displayAddButtons && (
             <>
               {currentNode.key !== 'Start' && <hr className={styles.divider} />}

@@ -5,8 +5,7 @@ import React, {
   FC,
   memo,
   useCallback,
-  MutableRefObject,
-  useEffect
+  MutableRefObject
 } from 'react';
 import { Pathway } from 'pathways-model';
 import useRefState from 'utils/useRefState';
@@ -28,16 +27,8 @@ interface CurrentPathwayProviderProps {
 export const CurrentPathwayProvider: FC<CurrentPathwayProviderProps> = memo(({ children }) => {
   const [pathway, pathwayRef, _setPathway] = useRefState<Pathway | null>(null);
 
-  useEffect(() => {
-    console.log('creating current pathway provider');
-
-    return () => console.log('unmounting current pathway provider');
-  }, []);
-
   const setPathway = useCallback(
     (value: Pathway) => {
-      console.log('Setting current pathway');
-      console.log(value);
       _setPathway(value);
     },
     [_setPathway]

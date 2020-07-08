@@ -17,12 +17,12 @@ interface BuilderProps {
 }
 
 const Builder: FC<BuilderProps> = ({ updatePathway, currentNode }) => {
-  const { pathway, pathwayRef } = useCurrentPathwayContext();
+  const { pathway } = useCurrentPathwayContext();
   const headerElement = useRef<HTMLDivElement>(null);
   const graphContainerElement = useRef<HTMLDivElement>(null);
   const theme = useTheme('dark');
 
-  console.log(pathway);
+  console.log(currentNode);
 
   // Set the height of the graph container
   useEffect(() => {
@@ -38,7 +38,7 @@ const Builder: FC<BuilderProps> = ({ updatePathway, currentNode }) => {
         <Navigation />
       </div>
 
-      {pathway && pathwayRef.current && (
+      {pathway && (
         <div className={styles.display}>
           <MuiThemeProvider theme={theme}>
             <Sidebar

@@ -70,12 +70,13 @@ const ActionNode: FC<ActionNodeProps> = ({ currentNode, changeNodeType, updatePa
       if (!currentNode.key || !pathwayRef.current) return;
 
       const code = event?.target.value || '';
-      const action: Action = currentNode.action[0];
+      const action = { ...currentNode.action[0] };
       if (action.resource.medicationCodeableConcept) {
         action.resource.medicationCodeableConcept.coding[0].code = code;
       } else {
         action.resource.code.coding[0].code = code;
       }
+      console.log(currentNode);
       resetDisplay(action);
       updatePathway(setStateAction(pathwayRef.current, currentNode.key, [action]));
     },
@@ -177,7 +178,7 @@ const ActionNode: FC<ActionNodeProps> = ({ currentNode, changeNodeType, updatePa
       if (!currentNode.key || !pathwayRef.current) return;
 
       const codeSystem = event?.target.value || '';
-      const action = currentNode.action[0];
+      const action = { ...currentNode.action[0] };
       if (action.resource.medicationCodeableConcept) {
         action.resource.medicationCodeableConcept.coding[0].system = codeSystem;
       } else {
