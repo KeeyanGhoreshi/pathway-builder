@@ -15,6 +15,7 @@ interface DropDownProps {
 }
 
 const DropDown: FC<DropDownProps> = ({ id, label, options, value, onChange }: DropDownProps) => {
+  if (onChange) console.log(onChange.toString());
   const handleSetSelected = useCallback(
     (event: ChangeEvent<{ value: unknown }>): void => {
       if (onChange) onChange(event);
