@@ -57,6 +57,8 @@ const ActionNode: FC<ActionNodeProps> = ({ changeNodeType, updatePathway }) => {
 
       const cql = createCQL(action, currentNodeKey);
       convertBasicCQL(cql).then(elm => {
+        // Disable lint for no-null assertion since it is already checked above
+        // eslint-disable-next-line
         updatePathway(setGuidanceStateElm(pathwayRef.current!, currentNodeKey, elm as ElmLibrary));
       });
     },
