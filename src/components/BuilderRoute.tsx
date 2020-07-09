@@ -20,12 +20,9 @@ const BuilderRoute: FC = () => {
   const pathway = pathways[pathwayIndex];
   const currentNode = pathway?.states?.[decodeURIComponent(nodeId)];
 
-  console.log(nodeId);
-
   const updatePathway = useCallback(
     (pathway: Pathway) => {
       setPathway(pathway);
-      // setCurrentNode(pathway?.states?.[decodeURIComponent(nodeId)]);
       updatePathwayAtIndex(pathway, pathwayIndex);
     },
     [pathwayIndex, updatePathwayAtIndex, setPathway]

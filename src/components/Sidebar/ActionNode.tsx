@@ -2,12 +2,7 @@ import React, { FC, memo, useCallback, ChangeEvent } from 'react';
 import { SidebarButton } from '.';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCheckCircle } from '@fortawesome/free-solid-svg-icons';
-import {
-  setStateAction,
-  createCQL,
-  setActionDescription,
-  setGuidanceStateElm
-} from 'utils/builder';
+import { setStateAction, createCQL, setGuidanceStateElm } from 'utils/builder';
 import DropDown from 'components/elements/DropDown';
 import { Pathway, GuidanceState, Action } from 'pathways-model';
 import { ElmLibrary } from 'elm-model';
@@ -95,17 +90,13 @@ const ActionNode: FC<ActionNodeProps> = ({ changeNodeType, updatePathway }) => {
       if (!currentNodeRef.current?.key || !pathwayRef.current) return;
 
       const description = event?.target.value || '';
-      const actionId = (currentNodeRef.current as GuidanceState).action[0].id; // TODO: change this for supporting multiple action
-      if (actionId) {
-        setActionDescription(pathwayRef.current, currentNodeRef.current.key, actionId, description);
-        updatePathway(
-          setStateAction(
-            pathwayRef.current,
-            currentNodeRef.current.key,
-            (currentNodeRef.current as GuidanceState).action
-          )
-        );
-      }
+      const action = produce(
+        (currentNodeRef.current as GuidanceState).action[0],
+        (draftAction: Action) => {
+          draftAction.description = description;
+        }
+      );
+      updatePathway(setStateAction(pathwayRef.current, currentNodeRef.current.key, [action]));
     },
     [currentNodeRef, pathwayRef, updatePathway]
   );

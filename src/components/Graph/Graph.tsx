@@ -28,7 +28,7 @@ interface ExpandedState {
   [key: string]: boolean | string | null;
 }
 
-const Graph: FC<GraphProps> = memo(({ interactive = true }) => {
+const Graph: FC<GraphProps> = memo(function Graph({ interactive = true }) {
   const { pathway } = useCurrentPathwayContext();
   const { currentNode } = useCurrentNodeContext();
   const graphElement = useRef<HTMLDivElement>(null);
@@ -182,103 +182,101 @@ interface GraphMemoProps {
   currentNode: State;
 }
 
-const GraphMemo: FC<GraphMemoProps> = memo(
-  ({
-    graphElement,
-    interactive,
-    maxHeight,
-    nodeCoordinates,
-    edges,
-    pathway,
-    nodeRefs,
-    parentWidth,
-    maxWidth,
-    expanded,
-    toggleExpanded,
-    currentNode
-  }) => {
-    const { id: pathwayId } = useParams();
-    const history = useHistory();
-    const redirectToNode = useCallback(
-      nodeId => {
-        const url = `/builder/${encodeURIComponent(pathwayId)}/node/${encodeURIComponent(nodeId)}`;
-        if (url !== history.location.pathname) {
-          history.push(url);
-        }
-      },
-      [history, pathwayId]
-    );
-    const onClickHandler = useCallback(
-      (nodeName: string) => {
-        if (interactive) {
-          redirectToNode(nodeName);
-          toggleExpanded(nodeName);
-        }
-      },
-      [redirectToNode, toggleExpanded, interactive]
-    );
-    return (
-      <div
-        ref={graphElement}
-        id="graph-root"
-        className={styles.root}
+const GraphMemo: FC<GraphMemoProps> = memo(function GraphMemo({
+  graphElement,
+  interactive,
+  maxHeight,
+  nodeCoordinates,
+  edges,
+  pathway,
+  nodeRefs,
+  parentWidth,
+  maxWidth,
+  expanded,
+  toggleExpanded,
+  currentNode
+}) {
+  const { id: pathwayId } = useParams();
+  const history = useHistory();
+  const redirectToNode = useCallback(
+    nodeId => {
+      const url = `/builder/${encodeURIComponent(pathwayId)}/node/${encodeURIComponent(nodeId)}`;
+      if (url !== history.location.pathname) {
+        history.push(url);
+      }
+    },
+    [history, pathwayId]
+  );
+  const onClickHandler = useCallback(
+    (nodeName: string) => {
+      if (interactive) {
+        redirectToNode(nodeName);
+        toggleExpanded(nodeName);
+      }
+    },
+    [redirectToNode, toggleExpanded, interactive]
+  );
+  return (
+    <div
+      ref={graphElement}
+      id="graph-root"
+      className={styles.root}
+      style={{
+        height: interactive ? maxHeight + 150 : 'inherit',
+        width: maxWidth + 'px',
+        position: 'relative',
+        marginRight: '5px'
+      }}
+    >
+      {nodeCoordinates !== undefined
+        ? Object.keys(nodeCoordinates).map(nodeName => {
+            return (
+              <Node
+                key={nodeName}
+                nodeKey={nodeName}
+                ref={(node: HTMLDivElement): void => {
+                  if (node) nodeRefs.current[nodeName] = node;
+                  else delete nodeRefs.current[nodeName];
+                }}
+                pathwayState={pathway.states[nodeName]}
+                xCoordinate={nodeCoordinates[nodeName].x + parentWidth / 2}
+                yCoordinate={nodeCoordinates[nodeName].y}
+                expanded={Boolean(expanded[nodeName])}
+                onClick={onClickHandler}
+                currentNode={currentNode}
+              />
+            );
+          })
+        : []}
+
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
         style={{
-          height: interactive ? maxHeight + 150 : 'inherit',
-          width: maxWidth + 'px',
-          position: 'relative',
-          marginRight: '5px'
+          width: maxWidth,
+          height: maxHeight,
+          zIndex: 1,
+          top: 0,
+          left: 0,
+          overflow: 'visible'
         }}
       >
-        {nodeCoordinates !== undefined
-          ? Object.keys(nodeCoordinates).map(nodeName => {
+        {edges !== undefined
+          ? Object.keys(edges).map(edgeName => {
+              const edge = edges[edgeName];
               return (
-                <Node
-                  key={nodeName}
-                  nodeKey={nodeName}
-                  ref={(node: HTMLDivElement): void => {
-                    if (node) nodeRefs.current[nodeName] = node;
-                    else delete nodeRefs.current[nodeName];
-                  }}
-                  pathwayState={pathway.states[nodeName]}
-                  xCoordinate={nodeCoordinates[nodeName].x + parentWidth / 2}
-                  yCoordinate={nodeCoordinates[nodeName].y}
-                  expanded={Boolean(expanded[nodeName])}
-                  onClick={onClickHandler}
+                <Arrow
+                  key={edgeName}
+                  edge={edge}
+                  edgeName={edgeName}
+                  widthOffset={parentWidth / 2}
                   currentNode={currentNode}
                 />
               );
             })
           : []}
-
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          style={{
-            width: maxWidth,
-            height: maxHeight,
-            zIndex: 1,
-            top: 0,
-            left: 0,
-            overflow: 'visible'
-          }}
-        >
-          {edges !== undefined
-            ? Object.keys(edges).map(edgeName => {
-                const edge = edges[edgeName];
-                return (
-                  <Arrow
-                    key={edgeName}
-                    edge={edge}
-                    edgeName={edgeName}
-                    widthOffset={parentWidth / 2}
-                    currentNode={currentNode}
-                  />
-                );
-              })
-            : []}
-        </svg>
-      </div>
-    );
-  }
-);
+      </svg>
+    </div>
+  );
+});
 
 export default Graph;
