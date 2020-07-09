@@ -17,6 +17,7 @@ import { TextField } from '@material-ui/core';
 import { convertBasicCQL } from 'engine/cql-to-elm';
 import { useCurrentPathwayContext } from 'components/CurrentPathwayProvider';
 import produce from 'immer';
+import { useCurrentNodeContext } from 'components/CurrentNodeProvider';
 
 const nodeTypeOptions = [
   { label: 'Action', value: 'action' },
@@ -39,13 +40,13 @@ const codeSystemOptions = [
 ];
 
 interface ActionNodeProps {
-  currentNode: GuidanceState;
   changeNodeType: (event: string) => void;
   updatePathway: (pathway: Pathway) => void;
 }
 
-const ActionNode: FC<ActionNodeProps> = ({ currentNode, changeNodeType, updatePathway }) => {
+const ActionNode: FC<ActionNodeProps> = ({ changeNodeType, updatePathway }) => {
   const { pathwayRef } = useCurrentPathwayContext();
+  const { currentNode, currentNodeRef } = useCurrentNodeContext();
   const styles = useStyles();
 
   const selectNodeType = useCallback(
@@ -69,53 +70,69 @@ const ActionNode: FC<ActionNodeProps> = ({ currentNode, changeNodeType, updatePa
 
   const changeCode = useCallback(
     (event: ChangeEvent<{ value: string }>): void => {
-      if (!currentNode.key || !pathwayRef.current) return;
+      if (!currentNodeRef.current?.key || !pathwayRef.current) return;
 
       const code = event?.target.value || '';
-      const action = produce(currentNode.action[0], (draftAction: Action) => {
-        if (draftAction.resource.medicationCodeableConcept) {
-          draftAction.resource.medicationCodeableConcept.coding[0].code = code;
-        } else {
-          draftAction.resource.code.coding[0].code = code;
+      const action = produce(
+        (currentNodeRef.current as GuidanceState).action[0],
+        (draftAction: Action) => {
+          if (draftAction.resource.medicationCodeableConcept) {
+            draftAction.resource.medicationCodeableConcept.coding[0].code = code;
+          } else {
+            draftAction.resource.code.coding[0].code = code;
+          }
         }
-      });
-      updatePathway(setStateAction(pathwayRef.current, currentNode.key, [resetDisplay(action)]));
+      );
+      updatePathway(
+        setStateAction(pathwayRef.current, currentNodeRef.current.key, [resetDisplay(action)])
+      );
     },
-    [currentNode, pathwayRef, updatePathway]
+    [currentNodeRef, pathwayRef, updatePathway]
   );
 
   const changeDescription = useCallback(
     (event: ChangeEvent<{ value: string }>): void => {
-      if (!currentNode.key || !pathwayRef.current) return;
+      if (!currentNodeRef.current?.key || !pathwayRef.current) return;
 
       const description = event?.target.value || '';
-      const actionId = currentNode.action[0].id; // TODO: change this for supporting multiple action
+      const actionId = (currentNodeRef.current as GuidanceState).action[0].id; // TODO: change this for supporting multiple action
       if (actionId) {
-        setActionDescription(pathwayRef.current, currentNode.key, actionId, description);
-        updatePathway(setStateAction(pathwayRef.current, currentNode.key, currentNode.action));
+        setActionDescription(pathwayRef.current, currentNodeRef.current.key, actionId, description);
+        updatePathway(
+          setStateAction(
+            pathwayRef.current,
+            currentNodeRef.current.key,
+            (currentNodeRef.current as GuidanceState).action
+          )
+        );
       }
     },
-    [currentNode, pathwayRef, updatePathway]
+    [currentNodeRef, pathwayRef, updatePathway]
   );
 
   const changeTitle = useCallback(
     (event: ChangeEvent<{ value: string }>): void => {
-      if (!currentNode.key || !pathwayRef.current) return;
+      if (!currentNodeRef.current?.key || !pathwayRef.current) return;
 
       const title = event?.target.value || '';
-      const action = produce(currentNode.action[0], (draftAction: Action) => {
-        draftAction.resource.title = title;
-      });
-      updatePathway(setStateAction(pathwayRef.current, currentNode.key, [resetDisplay(action)]));
+      const action = produce(
+        (currentNodeRef.current as GuidanceState).action[0],
+        (draftAction: Action) => {
+          draftAction.resource.title = title;
+        }
+      );
+      updatePathway(
+        setStateAction(pathwayRef.current, currentNodeRef.current.key, [resetDisplay(action)])
+      );
 
-      addActionCQL(action, currentNode.key);
+      addActionCQL(action, currentNodeRef.current.key);
     },
-    [currentNode, pathwayRef, updatePathway, addActionCQL]
+    [currentNodeRef, pathwayRef, updatePathway, addActionCQL]
   );
 
   const selectActionType = useCallback(
     (event: ChangeEvent<{ value: string }>): void => {
-      if (!currentNode.key || !pathwayRef.current) return;
+      if (!currentNodeRef.current?.key || !pathwayRef.current) return;
       const value = event?.target.value || '';
       const actionType = actionTypeOptions.find(option => {
         return option.value === value;
@@ -169,46 +186,59 @@ const ActionNode: FC<ActionNodeProps> = ({ currentNode, changeNodeType, updatePa
         };
       }
 
-      updatePathway(setStateAction(pathwayRef.current, currentNode.key, [action]));
+      updatePathway(setStateAction(pathwayRef.current, currentNodeRef.current.key, [action]));
     },
-    [currentNode, pathwayRef, updatePathway]
+    [currentNodeRef, pathwayRef, updatePathway]
   );
 
   const selectCodeSystem = useCallback(
     (event: ChangeEvent<{ value: string }>): void => {
-      if (!currentNode.key || !pathwayRef.current) return;
+      if (!currentNodeRef.current?.key || !pathwayRef.current) return;
 
       const codeSystem = event?.target.value || '';
-      const action = produce(currentNode.action[0], (draftAction: Action) => {
-        if (draftAction.resource.medicationCodeableConcept) {
-          draftAction.resource.medicationCodeableConcept.coding[0].system = codeSystem;
-        } else {
-          draftAction.resource.code.coding[0].system = codeSystem;
+      const action = produce(
+        (currentNodeRef.current as GuidanceState).action[0],
+        (draftAction: Action) => {
+          if (draftAction.resource.medicationCodeableConcept) {
+            draftAction.resource.medicationCodeableConcept.coding[0].system = codeSystem;
+          } else {
+            draftAction.resource.code.coding[0].system = codeSystem;
+          }
         }
-      });
-      updatePathway(setStateAction(pathwayRef.current, currentNode.key, [resetDisplay(action)]));
+      );
+      updatePathway(
+        setStateAction(pathwayRef.current, currentNodeRef.current.key, [resetDisplay(action)])
+      );
     },
-    [currentNode, pathwayRef, updatePathway]
+    [currentNodeRef, pathwayRef, updatePathway]
   );
 
   const validateFunction = useCallback((): void => {
-    if (currentNode.key && currentNode.action.length && pathwayRef.current) {
-      const action = produce(currentNode.action[0], (draftAction: Action) => {
-        if (draftAction.resource.medicationCodeableConcept) {
-          draftAction.resource.medicationCodeableConcept.coding[0].display = 'Example display text';
-        } else if (draftAction.resource.title) {
-          draftAction.resource.description = 'Example CarePlan Text';
-        } else {
-          draftAction.resource.code.coding[0].display = 'Example display text'; // TODO: actually validate
+    if (
+      currentNodeRef.current?.key &&
+      (currentNodeRef.current as GuidanceState).action.length &&
+      pathwayRef.current
+    ) {
+      const action = produce(
+        (currentNodeRef.current as GuidanceState).action[0],
+        (draftAction: Action) => {
+          if (draftAction.resource.medicationCodeableConcept) {
+            draftAction.resource.medicationCodeableConcept.coding[0].display =
+              'Example display text';
+          } else if (draftAction.resource.title) {
+            draftAction.resource.description = 'Example CarePlan Text';
+          } else {
+            draftAction.resource.code.coding[0].display = 'Example display text'; // TODO: actually validate
+          }
         }
-      });
-      updatePathway(setStateAction(pathwayRef.current, currentNode.key, [action]));
+      );
+      updatePathway(setStateAction(pathwayRef.current, currentNodeRef.current.key, [action]));
 
-      addActionCQL(action, currentNode.key);
+      addActionCQL(action, currentNodeRef.current.key);
     } else {
       console.error('No Actions -- Cannot Validate');
     }
-  }, [currentNode, pathwayRef, updatePathway, addActionCQL]);
+  }, [currentNodeRef, pathwayRef, updatePathway, addActionCQL]);
 
   const resetDisplay = (action: Action): Action => {
     return produce(action, (draftAction: Action) => {
@@ -229,8 +259,8 @@ const ActionNode: FC<ActionNodeProps> = ({ currentNode, changeNodeType, updatePa
   };
 
   // The node has a key and is not the start node
-  const changeNodeTypeEnabled = currentNode.key !== undefined && currentNode.key !== 'Start';
-  const action = currentNode.action;
+  const changeNodeTypeEnabled = currentNode?.key !== undefined && currentNode.key !== 'Start';
+  const action = (currentNode as GuidanceState).action;
   const resource = action?.length > 0 && action[0].resource;
   let system = '';
   let code = '';

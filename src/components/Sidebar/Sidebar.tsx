@@ -4,24 +4,24 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChevronLeft, faChevronRight, faPlus } from '@fortawesome/free-solid-svg-icons';
 
 import { SidebarHeader, BranchNode, ActionNode, NullNode, SidebarButton } from '.';
-import { State, GuidanceState, BranchState, Pathway } from 'pathways-model';
+import { Pathway } from 'pathways-model';
 import { setStateNodeType, addTransition, createState, addState, getNodeType } from 'utils/builder';
 import useStyles from './styles';
 import { useCurrentPathwayContext } from 'components/CurrentPathwayProvider';
+import { useCurrentNodeContext } from 'components/CurrentNodeProvider';
 
 interface SidebarProps {
   updatePathway: (pathway: Pathway) => void;
   headerElement: RefObject<HTMLDivElement>;
-  currentNode: GuidanceState | BranchState | State;
 }
 
-const Sidebar: FC<SidebarProps> = ({ updatePathway, headerElement, currentNode }) => {
+const Sidebar: FC<SidebarProps> = ({ updatePathway, headerElement }) => {
   const { pathway, pathwayRef } = useCurrentPathwayContext();
+  const { currentNode, currentNodeRef } = useCurrentNodeContext();
   const [isExpanded, setIsExpanded] = useState<boolean>(true);
   const styles = useStyles();
   const history = useHistory();
   const sidebarContainerElement = useRef<HTMLDivElement>(null);
-  const currentNodeKey = currentNode?.key;
 
   const toggleSidebar = useCallback((): void => {
     setIsExpanded(!isExpanded);
@@ -29,10 +29,10 @@ const Sidebar: FC<SidebarProps> = ({ updatePathway, headerElement, currentNode }
 
   const changeNodeType = useCallback(
     (nodeType: string): void => {
-      if (currentNodeKey && pathwayRef.current)
-        updatePathway(setStateNodeType(pathwayRef.current, currentNodeKey, nodeType));
+      if (currentNodeRef.current?.key && pathwayRef.current)
+        updatePathway(setStateNodeType(pathwayRef.current, currentNodeRef.current.key, nodeType));
     },
-    [pathwayRef, updatePathway, currentNodeKey]
+    [pathwayRef, updatePathway, currentNodeRef]
   );
 
   const redirectToNode = useCallback(
@@ -51,16 +51,16 @@ const Sidebar: FC<SidebarProps> = ({ updatePathway, headerElement, currentNode }
 
   const addNode = useCallback(
     (nodeType: string): void => {
-      if (!currentNodeKey || !pathwayRef.current) return;
+      if (!currentNodeRef.current?.key || !pathwayRef.current) return;
 
       const newState = createState();
       let newPathway = addState(pathwayRef.current, newState);
-      newPathway = addTransition(newPathway, currentNodeKey, newState.key as string);
+      newPathway = addTransition(newPathway, currentNodeRef.current.key, newState.key as string);
       newPathway = setStateNodeType(newPathway, newState.key as string, nodeType);
       updatePathway(newPathway);
       redirectToNode(newState.key);
     },
-    [pathwayRef, updatePathway, currentNodeKey, redirectToNode]
+    [pathwayRef, updatePathway, currentNodeRef, redirectToNode]
   );
 
   const addBranchNode = useCallback((): void => addNode('branch'), [addNode]);
@@ -75,40 +75,27 @@ const Sidebar: FC<SidebarProps> = ({ updatePathway, headerElement, currentNode }
   }, [isExpanded, headerElement]);
 
   if (!pathway) return <div>Error: No pathway</div>;
+  if (!currentNode) return <div>Error: No current node</div>;
 
-  const nodeType = getNodeType(pathway, currentNodeKey);
+  const nodeType = getNodeType(pathway, currentNode.key);
   // If the node does not have transitions it can be added to
   const displayAddButtons = currentNode.key !== undefined && currentNode.transitions.length === 0;
   return (
     <>
       {isExpanded && (
         <div className={styles.root} ref={sidebarContainerElement}>
-          <SidebarHeader
-            currentNode={currentNode}
-            updatePathway={updatePathway}
-            isTransition={false}
-          />
+          <SidebarHeader updatePathway={updatePathway} isTransition={false} />
 
           <hr className={styles.divider} />
 
-          {nodeType === 'null' && (
-            <NullNode currentNode={currentNode} changeNodeType={changeNodeType} />
-          )}
+          {nodeType === 'null' && <NullNode changeNodeType={changeNodeType} />}
 
           {nodeType === 'action' && (
-            <ActionNode
-              currentNode={currentNode as GuidanceState}
-              changeNodeType={changeNodeType}
-              updatePathway={updatePathway}
-            />
+            <ActionNode changeNodeType={changeNodeType} updatePathway={updatePathway} />
           )}
 
           {nodeType === 'branch' && (
-            <BranchNode
-              currentNode={currentNode}
-              changeNodeType={changeNodeType}
-              updatePathway={updatePathway}
-            />
+            <BranchNode changeNodeType={changeNodeType} updatePathway={updatePathway} />
           )}
 
           {displayAddButtons && (

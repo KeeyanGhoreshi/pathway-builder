@@ -8,20 +8,17 @@ import { Pathway, Transition } from 'pathways-model';
 import { useCriteriaContext } from 'components/CriteriaProvider';
 import useStyles from './styles';
 import { useCurrentPathwayContext } from 'components/CurrentPathwayProvider';
+import { useCurrentNodeContext } from 'components/CurrentNodeProvider';
 
 interface BranchTransitionProps {
-  currentNodeKey: string;
   transition: Transition;
   updatePathway: (pathway: Pathway) => void;
 }
 
-const BranchTransition: FC<BranchTransitionProps> = ({
-  currentNodeKey,
-  transition,
-  updatePathway
-}) => {
+const BranchTransition: FC<BranchTransitionProps> = ({ transition, updatePathway }) => {
   const { criteria } = useCriteriaContext();
   const { pathway, pathwayRef } = useCurrentPathwayContext();
+  const { currentNodeRef } = useCurrentNodeContext();
   const criteriaOptions = criteria.map(c => ({ value: c.id, label: c.label }));
   const styles = useStyles();
   const transitionKey = transition?.transition || '';
@@ -34,7 +31,7 @@ const BranchTransition: FC<BranchTransitionProps> = ({
 
   const selectCriteriaSource = useCallback(
     (event: ChangeEvent<{ value: string }>): void => {
-      if (!currentNodeKey || !transition.id || !pathwayRef.current) return;
+      if (!currentNodeRef.current?.key || !transition.id || !pathwayRef.current) return;
 
       const criteriaSource = event?.target.value || '';
       let elm = undefined;
@@ -47,7 +44,7 @@ const BranchTransition: FC<BranchTransitionProps> = ({
       updatePathway(
         setTransitionCondition(
           pathwayRef.current,
-          currentNodeKey,
+          currentNodeRef.current.key,
           transition.id,
           transition.condition?.description || '',
           elm,
@@ -55,36 +52,30 @@ const BranchTransition: FC<BranchTransitionProps> = ({
         )
       );
     },
-    [currentNodeKey, transition.id, updatePathway, pathwayRef, transition.condition, criteria]
+    [currentNodeRef, transition.id, updatePathway, pathwayRef, transition.condition, criteria]
   );
 
   const setCriteriaDisplay = useCallback(
     (event: ChangeEvent<{ value: string }>): void => {
-      if (!currentNodeKey || !transition.id || !pathwayRef.current) return;
+      if (!currentNodeRef.current?.key || !transition.id || !pathwayRef.current) return;
 
       const criteriaDisplay = event?.target.value || '';
       updatePathway(
         setTransitionConditionDescription(
           pathwayRef.current,
-          currentNodeKey,
+          currentNodeRef.current.key,
           transition.id,
           criteriaDisplay
         )
       );
     },
-    [currentNodeKey, transition.id, updatePathway, pathwayRef]
+    [currentNodeRef, transition.id, updatePathway, pathwayRef]
   );
   return (
     <>
       <hr className={styles.divider} />
 
-      {transitionNode && (
-        <SidebarHeader
-          currentNode={transitionNode}
-          updatePathway={updatePathway}
-          isTransition={true}
-        />
-      )}
+      {transitionNode && <SidebarHeader updatePathway={updatePathway} isTransition={true} />}
 
       {!(useCriteriaSelected || transition.condition?.cql) && (
         <SidebarButton

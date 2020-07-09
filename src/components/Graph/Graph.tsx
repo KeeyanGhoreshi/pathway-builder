@@ -18,18 +18,19 @@ import { Layout, NodeDimensions, NodeCoordinates, Edges } from 'graph-model';
 import styles from './Graph.module.scss';
 import ResizeSensor from 'css-element-queries/src/ResizeSensor';
 import { useCurrentPathwayContext } from 'components/CurrentPathwayProvider';
+import { useCurrentNodeContext } from 'components/CurrentNodeProvider';
 
 interface GraphProps {
   interactive?: boolean;
-  currentNode: State;
 }
 
 interface ExpandedState {
   [key: string]: boolean | string | null;
 }
 
-const Graph: FC<GraphProps> = memo(({ interactive = true, currentNode }) => {
+const Graph: FC<GraphProps> = memo(({ interactive = true }) => {
   const { pathway } = useCurrentPathwayContext();
+  const { currentNode } = useCurrentNodeContext();
   const graphElement = useRef<HTMLDivElement>(null);
   const nodeRefs = useRef<{ [key: string]: HTMLDivElement }>({});
   const [parentWidth, setParentWidth] = useState<number>(
@@ -144,6 +145,7 @@ const Graph: FC<GraphProps> = memo(({ interactive = true, currentNode }) => {
   }, [pathway, expanded, getGraphLayout]);
 
   if (!pathway) return <div>Error: No pathway loaded</div>;
+  else if (!currentNode) return <div>Error: No node selected</div>;
   else
     return (
       <GraphMemo

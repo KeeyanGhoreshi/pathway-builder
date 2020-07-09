@@ -34,8 +34,6 @@ export const PathwayProvider: FC<PathwayProviderProps> = memo(function PathwayPr
   const service = useGetService<Pathway>(config.get('demoPathwaysService'));
   const servicePayload = (service as ServiceLoaded<Pathway[]>).payload;
 
-  if (pathways.length >= 3) console.log(JSON.stringify(pathways[2].states, undefined, 2));
-
   const addPathway = useCallback((pathway: Pathway) => {
     setPathways(currentPathways => [...currentPathways, pathway]);
   }, []);

@@ -9,20 +9,21 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { IconButton, FormControl, Input } from '@material-ui/core';
 
-import { Pathway, State } from 'pathways-model';
+import { Pathway } from 'pathways-model';
 import { setStateLabel } from 'utils/builder';
 import useStyles from './styles';
 import { useCurrentPathwayContext } from 'components/CurrentPathwayProvider';
+import { useCurrentNodeContext } from 'components/CurrentNodeProvider';
 
 interface SidebarHeaderProps {
-  currentNode: State;
   updatePathway: (pathway: Pathway) => void;
   isTransition: boolean;
 }
 
-const SidebarHeader: FC<SidebarHeaderProps> = ({ currentNode, updatePathway, isTransition }) => {
+const SidebarHeader: FC<SidebarHeaderProps> = ({ updatePathway, isTransition }) => {
   const [showInput, setShowInput] = useState<boolean>(false);
   const { pathwayRef } = useCurrentPathwayContext();
+  const { currentNode } = useCurrentNodeContext();
   const inputRef = useRef<HTMLInputElement>(null);
   const currentNodeKey = currentNode?.key;
   const currentNodeLabel = currentNode?.label || '';

@@ -4,9 +4,10 @@ import { faPlus } from '@fortawesome/free-solid-svg-icons';
 import { SidebarButton, BranchTransition } from '.';
 import DropDown from 'components/elements/DropDown';
 import { addTransition, createState, addState } from 'utils/builder';
-import { Pathway, State } from 'pathways-model';
+import { Pathway } from 'pathways-model';
 import useStyles from './styles';
 import { useCurrentPathwayContext } from 'components/CurrentPathwayProvider';
+import { useCurrentNodeContext } from 'components/CurrentNodeProvider';
 
 const nodeTypeOptions = [
   { value: 'action', label: 'Action' },
@@ -14,14 +15,13 @@ const nodeTypeOptions = [
 ];
 
 interface BranchNodeProps {
-  currentNode: State;
   changeNodeType: (event: string) => void;
   updatePathway: (pathway: Pathway) => void;
 }
 
-const BranchNode: FC<BranchNodeProps> = ({ currentNode, changeNodeType, updatePathway }) => {
+const BranchNode: FC<BranchNodeProps> = ({ changeNodeType, updatePathway }) => {
   const { pathwayRef } = useCurrentPathwayContext();
-  const currentNodeKey = currentNode?.key;
+  const { currentNode, currentNodeRef } = useCurrentNodeContext();
   const styles = useStyles();
 
   const selectNodeType = useCallback(
@@ -37,8 +37,10 @@ const BranchNode: FC<BranchNodeProps> = ({ currentNode, changeNodeType, updatePa
     const newState = createState();
 
     const newPathway = addState(pathwayRef.current, newState);
-    updatePathway(addTransition(newPathway, currentNodeKey || '', newState.key as string));
-  }, [pathwayRef, updatePathway, currentNodeKey]);
+    updatePathway(
+      addTransition(newPathway, currentNodeRef.current?.key || '', newState.key as string)
+    );
+  }, [pathwayRef, updatePathway, currentNodeRef]);
 
   return (
     <>
@@ -49,11 +51,10 @@ const BranchNode: FC<BranchNodeProps> = ({ currentNode, changeNodeType, updatePa
         onChange={selectNodeType}
         value="branch"
       />
-      {currentNode.transitions.map(transition => {
+      {currentNode?.transitions.map(transition => {
         return (
           <BranchTransition
             key={transition.id}
-            currentNodeKey={currentNodeKey || ''}
             transition={transition}
             updatePathway={updatePathway}
           />
