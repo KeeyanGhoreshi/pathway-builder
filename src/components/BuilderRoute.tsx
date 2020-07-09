@@ -28,12 +28,10 @@ const BuilderRoute: FC = () => {
     [pathwayIndex, updatePathwayAtIndex, setPathway]
   );
 
-  // TODO: figure out if this is still needed - perhaps just []
   useEffect(() => {
     setPathway(pathway);
   }, [pathway, setPathway]);
 
-  // TODO: figure out if this is still needed - perhaps just []
   useEffect(() => {
     setCurrentNode(currentNode);
   }, [currentNode, setCurrentNode]);
