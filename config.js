@@ -1,7 +1,7 @@
 CONFIG = {
   mapper: null, // mapper name from fhir-mapper -- allows mapping of incoming FHIR resources
-  cqlToElmWebserviceUrl: 'https://cql-translation-service-zfk47ib3kq-uc.a.run.app/cql/translator',
-  pathwaysService: 'https://mcode.github.io/pathways/static/pathways/',
+  cqlToElmWebserviceUrl: 'http://moonshot-dev.mitre.org:8080/cql/translator',
+  pathwaysService: 'http://pathways.mitre.org:3002/pathways/',
   demoPathwaysService: './static/pathways/',
   demoPatients: './static/demoData/',
   demoCriteria: './static/criteria/'
